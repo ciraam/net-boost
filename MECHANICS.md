@@ -8,7 +8,7 @@ Every runtime parameter shaping the native Windows network boost engine, ICMP te
 - **Registry Tweaks (`winreg`)**: `TCPNoDelay = 1`, `TcpAckFrequency = 1`, `NetworkThrottlingIndex = 0xFFFFFFFF`, `Tcpip\QoS` `"Do not use NLA" = "1"`, strict interface GUID path validation — *source: user request*
 - **Windows Firewall**: Native COM `INetFwPolicy2` / `INetFwRule` (`NetBoost_Block_*` Inbound + Outbound) — *source: user request*
 - **Windows Services**: Native Win32 Service Control Manager (`OpenSCManagerW` / `ControlService` / `StartServiceW`) for `wuauserv`, `bits`, `DoSvc` — *source: user request*
-- **System Tray**: Native Tauri v2 `TrayIconBuilder` (minimize to tray button + automatic minimize-to-tray on close while Boost/Tunnel is active) — *source: user request*
+- **System Tray (0 MB UI / 0 MB VRAM / 0% CPU)**: Native Tauri v2 `TrayIconBuilder` — destroys the WebView2 window (`window.destroy()`) and stops `PingMonitor` when minimized to tray or closed during active Boost/Tunnel (`RunEvent::ExitRequested` keeps Rust alive via `api.prevent_exit()`), and recreates the UI window on demand via `WebviewWindowBuilder::from_config` — *source: user request*
 
 ## Live Packet Inspector, Embedded Offline GeoIP & ETW UDP
 - **Socket inspection**: Native Win32 `GetExtendedTcpTable` + `GetExtendedUdpTable` + `sysinfo` + on-demand native Windows ETW capture (`Microsoft-Windows-Kernel-Network`, `2500 ms` window, events `42, 43, 58, 59`) — *source: user request*

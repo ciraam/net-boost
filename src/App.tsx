@@ -108,9 +108,27 @@ export const App: React.FC = () => {
   const [tracerouteRunning, setTracerouteRunning] = useState(false);
   const [tracerouteHost, setTracerouteHost] = useState('');
 
-  // Global status / toast
+  // Global status / toast & theme
   const [busyRollback, setBusyRollback] = useState(false);
   const [notice, setNotice] = useState<{ text: string; tone: 'info' | 'ok' | 'warn' } | null>(null);
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    try {
+      return localStorage.getItem('netboost-theme') === 'light' ? 'light' : 'dark';
+    } catch {
+      return 'dark';
+    }
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove('dark', 'light');
+    root.classList.add(theme);
+    try {
+      localStorage.setItem('netboost-theme', theme);
+    } catch {
+      // ignore
+    }
+  }, [theme]);
 
   const showNotice = useCallback((text: string, tone: 'info' | 'ok' | 'warn' = 'info') => {
     setNotice({ text, tone });
@@ -519,7 +537,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="h-screen w-screen flex tactical-bg text-text-primary overflow-hidden">
+    <div className="h-screen w-screen flex craft-canvas-bg text-foreground overflow-hidden">
       <Sidebar
         activeTab={activeTab}
         onSelectTab={setActiveTab}
@@ -540,6 +558,8 @@ export const App: React.FC = () => {
           onRollback={handleRollback}
           onMinimizeToTray={() => void netboostApi.minimizeToTray()}
           busyRollback={busyRollback}
+          theme={theme}
+          onToggleTheme={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
         />
 
         {systemInfo?.hasOrphanBackup && !boostState?.active && (

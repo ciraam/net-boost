@@ -20,7 +20,7 @@ use std::time::Duration;
 
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
-use tauri::{AppHandle, Manager, RunEvent, State, WindowEvent};
+use tauri::{AppHandle, Manager, RunEvent, State, WebviewWindowBuilder, WindowEvent};
 use tauri_plugin_dialog::DialogExt;
 
 use crate::boost_engine::BoostEngine;
@@ -109,10 +109,47 @@ fn relaunch_admin(app: AppHandle, state: State<'_, AppState>) -> SimpleResult {
     }
 }
 
+/// Opens and focuses the main WebView2 window, recreating it from `tauri.conf.json`
+/// if it was destroyed during System Tray hibernation (0 MB UI / 0 MB VRAM / 0% CPU).
+fn open_or_focus_main_window(app: &AppHandle) {
+    if let Some(w) = app.get_webview_window("main") {
+        let _ = w.show();
+        let _ = w.unminimize();
+        let _ = w.set_focus();
+        return;
+    }
+
+    if let Some(win_cfg) = app.config().app.windows.first() {
+        if let Ok(builder) = WebviewWindowBuilder::from_config(app, win_cfg) {
+            if let Ok(win) = builder.visible(true).build() {
+                let _ = win.show();
+                let _ = win.unminimize();
+                let _ = win.set_focus();
+                if let Some(state) = app.try_state::<AppState>() {
+                    state.logger.info(
+                        "system",
+                        "Fenêtre NetBoost recréée depuis le System Tray",
+                        "Interface WebView2 restaurée à la demande.",
+                        "ok",
+                    );
+                }
+            }
+        }
+    }
+}
+
 #[tauri::command]
-fn minimize_to_tray(app: AppHandle) -> SimpleResult {
+fn minimize_to_tray(app: AppHandle, state: State<'_, AppState>) -> SimpleResult {
+    state.ping_monitor.stop();
+    state.traceroute.cancel();
+    state.logger.info(
+        "system",
+        "Mode System Tray (0 Mo VRAM / 0% CPU)",
+        "Fenêtre WebView2 détruite et ping arrêté ; NetBoost reste actif en arrière-plan.",
+        "ok",
+    );
     if let Some(win) = app.get_webview_window("main") {
-        let _ = win.hide();
+        let _ = win.destroy();
     }
     SimpleResult { ok: true, error: None }
 }
@@ -696,11 +733,7 @@ pub fn run() {
                 .show_menu_on_left_click(false)
                 .on_menu_event(move |app, event| match event.id.as_ref() {
                     "open" => {
-                        if let Some(w) = app.get_webview_window("main") {
-                            let _ = w.show();
-                            let _ = w.unminimize();
-                            let _ = w.set_focus();
-                        }
+                        open_or_focus_main_window(app);
                     }
                     "rollback" => {
                         let be = be_tray.clone();
@@ -726,11 +759,7 @@ pub fn run() {
                         ..
                     } = event
                     {
-                        if let Some(w) = tray.app_handle().get_webview_window("main") {
-                            let _ = w.show();
-                            let _ = w.unminimize();
-                            let _ = w.set_focus();
-                        }
+                        open_or_focus_main_window(tray.app_handle());
                     }
                 })
                 .build(app)?;
@@ -769,17 +798,20 @@ pub fn run() {
                     let app_c = handle.clone();
                     let pm_c = ping_monitor.clone();
                     let tr_c = traceroute.clone();
+                    let q_c = quitting.clone();
                     std::thread::spawn(move || {
                         std::thread::sleep(Duration::from_millis(3800));
                         let out_png_c = out_png.clone();
                         let app_exit = app_c.clone();
                         let pm_exit = pm_c.clone();
                         let tr_exit = tr_c.clone();
+                        let q_exit = q_c.clone();
                         let _ = app_c.run_on_main_thread(move || {
                             if let Some(raw) = hwnd_isize {
                                 let hwnd = windows::Win32::Foundation::HWND(raw as *mut _);
                                 let _ = capture_hwnd_to_png(hwnd, Path::new(&out_png_c));
                             }
+                            q_exit.store(true, Ordering::SeqCst);
                             pm_exit.stop();
                             tr_exit.cancel();
                             app_exit.exit(0);
@@ -794,6 +826,7 @@ pub fn run() {
                     let pm_c = ping_monitor.clone();
                     let tr_c = traceroute.clone();
                     let tunnel_c = tunnel.clone();
+                    let q_c = quitting.clone();
                     tauri::async_runtime::spawn(async move {
                         tokio::time::sleep(Duration::from_millis(2200)).await;
                         let adapter = get_active_network_adapter(false, &logger_c);
@@ -842,6 +875,7 @@ pub fn run() {
                             let _ = fs::create_dir_all(parent);
                         }
                         let _ = fs::write(&p, serde_json::to_string_pretty(&report).unwrap_or_default());
+                        q_c.store(true, Ordering::SeqCst);
                         pm_c.stop();
                         tr_c.cancel();
                         app_c.exit(0);
@@ -858,15 +892,20 @@ pub fn run() {
                     && !is_automated
                     && (state.boost_engine.get_state().active || state.tunnel.is_active())
                 {
-                    // Minimize to System Tray during active match boost to keep RAM/CPU footprint minimal!
+                    // Destroy WebView2 window and stop ping monitor to free 100% of msedgewebview2.exe (0 MB VRAM / 0% CPU)
                     api.prevent_close();
-                    let _ = window.hide();
+                    state.ping_monitor.stop();
+                    state.traceroute.cancel();
                     state.logger.info(
                         "system",
-                        "Réduction en System Tray",
-                        "Fenêtre masquée en barre des tâches pendant la session Boost active.",
+                        "Mode System Tray (0 Mo VRAM / 0% CPU)",
+                        "Fenêtre WebView2 détruite pendant la session active ; cliquez sur l'icône Tray pour rouvrir NetBoost.",
                         "ok",
                     );
+                    let _ = window.destroy();
+                } else {
+                    // Normal close when neither Boost nor Tunnel is active -> allow full exit with rollback
+                    state.quitting.store(true, Ordering::SeqCst);
                 }
             }
         })
@@ -908,8 +947,13 @@ pub fn run() {
         .expect("Erreur d'initialisation Tauri v2");
 
     app.run(move |app_handle, event| {
-        if let RunEvent::ExitRequested { .. } = event {
+        if let RunEvent::ExitRequested { api, .. } = event {
             let state = app_handle.state::<AppState>();
+            if !is_automated && !state.quitting.load(Ordering::SeqCst) {
+                // Keep Rust background process + TrayIcon + 0% CPU Game Watcher alive after WebView2 destruction
+                api.prevent_exit();
+                return;
+            }
             state.ping_monitor.stop();
             state.traceroute.cancel();
             if !is_automated && state.boost_engine.has_pending_modifications() {
