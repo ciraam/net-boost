@@ -1,0 +1,33 @@
+{
+  "name": "netboost",
+  "version": "1.0.0",
+  "description": "NetBoost — Application Desktop Windows Tauri v2 + Rust (windows-rs) d'optimisation et routage réseau pour jeux",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tauri build",
+    "tauri": "tauri",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.2.0",
+    "@tauri-apps/plugin-dialog": "^2.2.0",
+    "lucide-react": "^0.475.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "recharts": "^2.15.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.9",
+    "@tauri-apps/cli": "^2.2.7",
+    "@types/node": "^22.13.5",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "tailwindcss": "^4.0.9",
+    "typescript": "^5.7.3",
+    "vite": "^6.2.0",
+    "vitest": "^3.0.7"
+  }
+}

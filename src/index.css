@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg-void: #070A0F;
+  --color-bg-surface: #0B111C;
+  --color-bg-panel: #101827;
+  --color-bg-elevated: #162235;
+  --color-border-subtle: #1B293F;
+  --color-border-strong: #2A3F5F;
+
+  --color-neon-cyan: #00E5FF;
+  --color-neon-green: #10F5A0;
+  --color-neon-amber: #FFB800;
+  --color-neon-red: #FF3B5C;
+  --color-neon-purple: #A855F7;
+
+  --color-text-primary: #F1F5F9;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+
+  --font-sans: "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "Cascadia Code", "JetBrains Mono", "Consolas", monospace;
+}
+
+@layer base {
+  html, body, #root {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: var(--color-bg-void);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+  }
+}
+
+/* Tactical Telemetry Background Grid + Ambient Glow */
+.tactical-bg {
+  background-color: #070A0F;
+  background-image:
+    radial-gradient(ellipse 60% 45% at 50% -10%, rgba(0, 229, 255, 0.08), transparent 70%),
+    radial-gradient(ellipse 40% 35% at 90% 95%, rgba(16, 245, 160, 0.05), transparent 70%),
+    linear-gradient(rgba(27, 41, 63, 0.22) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(27, 41, 63, 0.22) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+}
+
+/* Translucent 1px-bordered Tactical Surface */
+.tactical-card {
+  background: linear-gradient(180deg, rgba(16, 24, 39, 0.88) 0%, rgba(11, 17, 28, 0.92) 100%);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(35, 52, 80, 0.85);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045), 0 10px 30px rgba(0, 0, 0, 0.38);
+}
+
+.metric-mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Custom slim scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #070A0F;
+}
+::-webkit-scrollbar-thumb {
+  background: #1F304A;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00E5FF;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.94);
+    opacity: 0.75;
+  }
+  75% {
+    transform: scale(1.16);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.16);
+    opacity: 0;
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2.4s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 16s linear infinite;
+}
+
+@keyframes spin-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.animate-spin-reverse {
+  animation: spin-reverse 22s linear infinite;
+}
+
+@keyframes step-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+.animate-step-shimmer {
+  animation: step-shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes status-beacon {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.85);
+  }
+}
+
+.animate-status-beacon {
+  animation: status-beacon 1.8s ease-in-out infinite;
+}

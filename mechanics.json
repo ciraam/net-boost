@@ -1,0 +1,185 @@
+{
+  "version": 1,
+  "values": [
+    {
+      "name": "game QoS DSCP value",
+      "group": "boost_engine",
+      "value": 46,
+      "unit": "DSCP",
+      "source": "user request (New-NetQosPolicy valeur 46)"
+    },
+    {
+      "name": "QoS Do not use NLA registry string",
+      "group": "boost_engine",
+      "value": "1",
+      "source": "user request (Do not use NLA = 1 sous Tcpip\\QoS hors domaine AD)"
+    },
+    {
+      "name": "GeoIP lookup protocol",
+      "group": "packet_inspector",
+      "value": "Embedded Rust offline binary search (<0.001 ms) + optional HTTPS fallback",
+      "source": "user request (GeoIP hors-ligne Rust)"
+    },
+    {
+      "name": "ETW UDP capture window duration",
+      "group": "packet_inspector",
+      "value": 2500,
+      "unit": "ms",
+      "source": "user request (Inspecteur UDP ETW Microsoft-Windows-Kernel-Network)"
+    },
+    {
+      "name": "WireGuard config storage encryption",
+      "group": "security",
+      "value": "Windows DPAPI (CryptProtectData)",
+      "source": "user request (chiffrement .conf via DPAPI Windows CryptProtectData)"
+    },
+    {
+      "name": "ICMP Ping & Traceroute engine",
+      "group": "monitoring",
+      "value": "Win32 IcmpSendEcho (iphlpapi)",
+      "source": "user request (Ping & Traceroute ICMP natifs via Win32 IcmpSendEcho)"
+    },
+    {
+      "name": "Game exit watcher engine",
+      "group": "safety_rollback",
+      "value": "Win32 OpenProcess + WaitForSingleObject (0% CPU)",
+      "source": "user request (Game Watcher a 0% CPU via OpenProcess + WaitForSingleObject)"
+    },
+    {
+      "name": "Firewall rule engine",
+      "group": "packet_inspector",
+      "value": "Windows COM INetFwPolicy2",
+      "source": "user request (Pare-feu INetFwPolicy2 COM)"
+    },
+    {
+      "name": "System Tray background mode",
+      "group": "ui",
+      "value": true,
+      "source": "user request (mode System Tray reduction en barre des taches pendant le jeu)"
+    },
+    {
+      "name": "background throttle QoS DSCP value",
+      "group": "background_control",
+      "value": 8,
+      "unit": "DSCP",
+      "source": "user request (QoS basse priorite DSCP 8)"
+    },
+    {
+      "name": "TCPNoDelay registry value",
+      "group": "tcpip_optimization",
+      "value": 1,
+      "unit": "DWORD",
+      "source": "user request (activer TCPNoDelay)"
+    },
+    {
+      "name": "TcpAckFrequency registry value",
+      "group": "tcpip_optimization",
+      "value": 1,
+      "unit": "DWORD",
+      "source": "user request (activer TcpAckFrequency)"
+    },
+    {
+      "name": "NetworkThrottlingIndex disabled value",
+      "group": "tcpip_optimization",
+      "value": 4294967295,
+      "unit": "DWORD",
+      "source": "user request (desactiver NetworkThrottlingIndex 0xFFFFFFFF)"
+    },
+    {
+      "name": "disable network adapter EEE",
+      "group": "tcpip_optimization",
+      "value": true,
+      "source": "user request (desactiver EEE adaptateur reseau actif)"
+    },
+    {
+      "name": "live packet inspector GeoIP batch size",
+      "group": "packet_inspector",
+      "value": 90,
+      "unit": "IPs",
+      "estimated": true
+    },
+    {
+      "name": "firewall block rule prefix",
+      "group": "packet_inspector",
+      "value": "NetBoost_Block_",
+      "source": "user request (New-NetFirewallRule + suppression auto)"
+    },
+    {
+      "name": "split tunnel WireSock directive",
+      "group": "eu_tunnel",
+      "value": "AllowedApps",
+      "source": "user request (WireSock AllowedApps = .exe du jeu)"
+    },
+    {
+      "name": "split tunnel WireGuard directive",
+      "group": "eu_tunnel",
+      "value": "AllowedIPs",
+      "source": "user request (WireGuard AllowedIPs)"
+    },
+    {
+      "name": "mandatory JSON backup before modifications",
+      "group": "safety_rollback",
+      "value": true,
+      "source": "user request (sauvegarde JSON + Rollback obligatoire avant toute modification)"
+    },
+    {
+      "name": "auto rollback tunnel firewall and QoS on exit",
+      "group": "safety_rollback",
+      "value": true,
+      "source": "user request (restauration auto complete Rollback + coupure tunnel + suppression regles pare-feu/QoS)"
+    },
+    {
+      "name": "DNS benchmark primary Cloudflare",
+      "group": "dns_benchmark",
+      "value": "1.1.1.1",
+      "source": "user request (Benchmark DNS 1.1.1.1)"
+    },
+    {
+      "name": "DNS benchmark Google",
+      "group": "dns_benchmark",
+      "value": "8.8.8.8",
+      "source": "user request (Benchmark DNS 8.8.8.8)"
+    },
+    {
+      "name": "DNS benchmark Quad9",
+      "group": "dns_benchmark",
+      "value": "9.9.9.9",
+      "source": "user request (Benchmark DNS 9.9.9.9)"
+    },
+    {
+      "name": "DNS benchmark query timeout",
+      "group": "dns_benchmark",
+      "value": 2000,
+      "unit": "ms",
+      "estimated": true
+    },
+    {
+      "name": "live ping polling interval",
+      "group": "monitoring",
+      "value": 1000,
+      "unit": "ms",
+      "estimated": true
+    },
+    {
+      "name": "live ping ICMP timeout",
+      "group": "monitoring",
+      "value": 1500,
+      "unit": "ms",
+      "estimated": true
+    },
+    {
+      "name": "traceroute max hops",
+      "group": "monitoring",
+      "value": 20,
+      "unit": "hops",
+      "estimated": true
+    },
+    {
+      "name": "game exit watcher interval",
+      "group": "safety_rollback",
+      "value": 4000,
+      "unit": "ms",
+      "estimated": true
+    }
+  ]
+}
